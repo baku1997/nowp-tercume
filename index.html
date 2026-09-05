@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NOWP Group tərcümə sistemi</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f8fafc;
+    color: #0f172a;
+  }
+  header {
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header h1 { font-size: 20px; margin: 0; font-weight: 600; }
+  .badge {
+    background: #f1f5f9;
+    color: #64748b;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+  h2 { font-size: 28px; margin: 0 0 8px; }
+  .sub { color: #475569; font-size: 16px; margin: 0 0 24px; max-width: 600px; }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 800px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+  }
+  select {
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #334155;
+    cursor: pointer;
+  }
+  textarea {
+    flex: 1;
+    border: none;
+    resize: none;
+    padding: 16px;
+    font-size: 17px;
+    min-height: 320px;
+    outline: none;
+    font-family: inherit;
+  }
+  .panel-footer {
+    padding: 16px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: flex-end;
+  }
+  button.translate {
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  button.translate:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.translate:hover:not(:disabled) { background: #4338ca; }
+  .output {
+    flex: 1;
+    padding: 16px;
+    min-height: 320px;
+    font-size: 17px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    color: #0f172a;
+  }
+  .placeholder { color: #94a3b8; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .error { color: #dc2626; background: #fef2f2; padding: 16px; border-radius: 12px; border: 1px solid #fecaca; }
+  .swap-row { display: flex; justify-content: center; margin-bottom: 16px; }
+  .swap-btn {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #475569;
+  }
+  .copy-btn {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NOWP Group tərcümə sistemi</h1>
+  <div class="badge" id="lang-badge">EN → AZ</div>
+</header>
+
+<main>
+  <h2>Professional tərcümə</h2>
+  <p class="sub">Mətnlərinizi daxil edin və süni intellektin köməyi ilə təbii tərcümə əldə edin.</p>
+
+  <div class="swap-row">
+    <button class="swap-btn" id="swap-btn">⇄ Dilləri dəyiş</button>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="panel-header">
+        <select id="source-lang">
+          <option value="İngiliscə (English)" data-code="EN">İngiliscə</option>
+          <option value="Azərbaycanca" data-code="AZ">Azərbaycanca</option>
+          <option value="Rusca (Русский)" data-code="RU">Rusca</option>
+          <option value="Türkcə (Türkçe)" data-code="TR">Türkcə</option>
+        </select>
+      </div>
+      <textarea id="source-text" placeholder="Tərcümə etmək istədiyiniz mətni bura yazın..."></textarea>
+      <div class="panel-footer">
+        <button class="translate" id="translate-btn">Tərcümə et →</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <select id="target-lang">
+          <option value="Azərbaycanca" data-code="AZ">Azərbaycanca</option>
+          <option value="İngiliscə (English)" data-code="EN">İngiliscə</option>
+          <option value="Rusca (Русский)" data-code="RU">Rusca</option>
+          <option value="Türkcə (Türkçe)" data-code="TR">Türkcə</option>
+        </select>
+        <button class="copy-btn" id="copy-btn" style="display:none;">Kopyala</button>
+      </div>
+      <div class="output" id="output">
+        <div class="placeholder">Tərcümə burada görünəcək</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const sourceText = document.getElementById('source-text');
+  const sourceLang = document.getElementById('source-lang');
+  const targetLang = document.getElementById('target-lang');
+  const translateBtn = document.getElementById('translate-btn');
+  const output = document.getElementById('output');
+  const copyBtn = document.getElementById('copy-btn');
+  const swapBtn = document.getElementById('swap-btn');
+  const langBadge = document.getElementById('lang-badge');
+
+  let lastTranslation = '';
+
+  function updateBadge() {
+    const s = sourceLang.options[sourceLang.selectedIndex].dataset.code;
+    const t = targetLang.options[targetLang.selectedIndex].dataset.code;
+    langBadge.textContent = s + ' → ' + t;
+  }
+  sourceLang.addEventListener('change', updateBadge);
+  targetLang.addEventListener('change', updateBadge);
+  updateBadge();
+
+  translateBtn.addEventListener('click', async () => {
+    const text = sourceText.value.trim();
+    if (!text) return;
+
+    translateBtn.disabled = true;
+    translateBtn.textContent = 'Tərcümə edilir...';
+    output.innerHTML = '';
+    copyBtn.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          sourceLang: sourceLang.value,
+          targetLang: targetLang.value
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Naməlum xəta');
+      lastTranslation = data.translation || '';
+      output.textContent = lastTranslation;
+      copyBtn.style.display = lastTranslation ? 'inline' : 'none';
+    } catch (err) {
+      output.innerHTML = '<div class="error">' + (err.message || 'Xəta baş verdi') + '</div>';
+    } finally {
+      translateBtn.disabled = false;
+      translateBtn.textContent = 'Tərcümə et →';
+    }
+  });
+
+  copyBtn.addEventListener('click', () => {
+    if (!lastTranslation) return;
+    navigator.clipboard.writeText(lastTranslation);
+    copyBtn.textContent = 'Kopyalandı';
+    setTimeout(() => { copyBtn.textContent = 'Kopyala'; }, 2000);
+  });
+
+  swapBtn.addEventListener('click', () => {
+    const sVal = sourceLang.value, tVal = targetLang.value;
+    sourceLang.value = tVal;
+    targetLang.value = sVal;
+    const sText = sourceText.value, oText = lastTranslation;
+    sourceText.value = oText;
+    lastTranslation = sText;
+    output.textContent = sText || '';
+    updateBadge();
+  });
+</script>
+
+</body>
+</html>
